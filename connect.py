@@ -4,12 +4,14 @@ Connection class
 
 """
 from ib_insync import *
+import asyncio
 
-class ib_connect(Object):
+class ib_connect:
     def __init__(self, host='127.0.0.1', port=7497, client_id=1):
         self.host = host
         self.port = port
         self.client_id = client_id
+        self.ticker = None
 
         self.ib = IB()
 
@@ -21,15 +23,24 @@ class ib_connect(Object):
         """ close the connection to IB """
         self.ib.disconnect()
 
-    def start_stream(self, ticker):
-        pass
+    def start_stream(self, ticker, loopback_function):
+        """
 
-    def new_tick(self, tickers):
-        for t in tickers:
-            
+        :param ticker: 
+        :param loopback_function: 
+        """
+
+        self.ticker = Forex(ticker)
+
+        self.ib.reqMktData(self.ticker)
+        self.ib.pendingTickersEvent += loopback_function
+
+        while self.ib.waitOnUpdate():
+            self.ib.sleep(1)
     
-    def create_marketorder(self, ticker, amount):
-        pass
+    def create_marketorder(self, action, amount):
+        marketOrder = MarketOrder(action = action, totalQuantity= amount)
+        trade = self.ib.placeOrder(self.ticker, marketOrder) 
     
     def create_limitorder(self, ticker, amount, limit):
         pass
