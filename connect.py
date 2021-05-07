@@ -1,7 +1,7 @@
 """
-Connection class
-
-
+Connection class that serves as the backbone of the strategy.
+It contains the functionalities of a trading strategy so to separate the
+process of creating the strategy and the technical part.
 """
 from ib_insync import *
 
@@ -10,12 +10,12 @@ class ib_connect:
         """
         Initial parameters of the IB Connection.
         """
-        self.host = host
-        self.port = port
-        self.client_id = client_id
+        self.host = host            # Localhost
+        self.port = port            # Port IB uses.
+        self.client_id = client_id 
 
-        self.open_order = False
-        self.ticker = None
+        self.open_order = False     # flag if there are open orders
+        self.ticker = None          # flag that will take the ticker of the strategy file.
 
         self.ib = IB()
 
@@ -52,14 +52,17 @@ class ib_connect:
 
     def order_filled(self, trade):
         """ Routine to report that a trade is executed """
+        print('Trade Executed')
         self.open_order = False
         
 
     def create_marketorder(self, action: str, amount: int):
         """
+        Create a market order and return the order id or false if not 
+        enough money is available.
 
-        :param action:
-        :param amount:
+        :param action: Buy or Sell.
+        :param amount: amount of shares to trade.
         :return: orderId
         """
         if self.balance_check(amount):
@@ -81,6 +84,17 @@ class ib_connect:
         :param limit: Limit price at which the trade will be entered.
         :return: orderID.
         """
+
+        limitOrder = LimitOrder(action = action, totalQuantity= amount, lmtPrice = round(limit, 5))
+        order = self.ib.placeOrder(self.ticker, limitOrder)
+        order.filledEvent += self.order_filled
+
+        if order.orderStatus.status == 'Submitted':
+            print('Limit{} order submitted @ {}'.format(action, limit))
+
+        return order.order
+
+        """
         if self.balance_check(amount):
             limitOrder = LimitOrder(action = action, totalQuantity= amount, lmtPrice = limit)
             order = self.ib.placeOrder(self.ticker, limitOrder)
@@ -94,6 +108,18 @@ class ib_connect:
             print('Not enough money left')
             return False
 
+        """
+
+    def modify_limit_order(self, order, limit: float):
+        order.lmtPrice = round(limit, 5)
+
+        new_order = self.ib.placeOrder(self.ticker, order)
+        new_order.filledEvent += self.order_filled
+
+        if new_order.orderStatus.status == 'Submitted':
+            print('Limit order modified @ {}'.format(limit))
+        
+        return new_order.order
 
     def cancel_order(self, id_):
         """
@@ -105,6 +131,13 @@ class ib_connect:
 
 
     def check_order_status(self, id_):
+        """
+        This function will check the status of an order.
+        If the order is still open, it will wait for 5 seconds 
+        and check again if it is executed. 
+        
+        :param id_: orderID.
+        """
         status = id_.orderStatus.status
         while id_.isDone():
             print('pending')
@@ -116,10 +149,10 @@ class ib_connect:
         This function checks if there is enough money left in the account 
         to execute the current trade.
 
-        :param amount: (int) number of shares that will be traded
+        :param amount: (int) number of shares that will be traded.
         :return: (bool) True if enough is available, false otherwise.
         """
-        available = available_balance()
+        available = self.available_balance()
         if available >= amount: return True
         else: return False
 
@@ -130,6 +163,12 @@ class ib_connect:
 
         :return (int): available balance.
         """
-        account = ib.accountSummary()
+        account = self.ib.accountSummary()
         available = account[10].value
         return available
+
+    def open_orders(self):
+        lst = self.ib.openTrades()
+        if len(lst) == 0:
+            return False
+        return True
