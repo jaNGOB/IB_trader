@@ -6,7 +6,7 @@ Jan Gobeli, 07.05.2021.
 import numpy as np
 import connect as ibc
 
-
+### PARAMETERS ###
 amount = 5          # Amount that will be traded on each signal.
 ticker = 'EURUSD'   # Trading ticker.
 last_buy = None     # 
@@ -15,6 +15,8 @@ lookback = 100      # Amount of data is needed for the trade logic.
 
 spread = 0.00002
 trade_open = False
+
+###################
 
 data = np.array([0])
 
