@@ -167,8 +167,18 @@ class ib_connect:
         available = account[10].value
         return available
 
+
     def open_orders(self):
         lst = self.ib.openTrades()
         if len(lst) == 0:
             return False
         return True
+
+
+    def sleep(self, time: float) -> None:
+        """
+        Wait for 'time' seconds while everything keeps processing in the background.
+        
+        :param time: amount of time to sleep
+        """
+        self.ib.sleep(time)

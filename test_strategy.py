@@ -3,10 +3,8 @@ Example of a trading strategy implementation.
 
 Jan Gobeli, 07.05.2021.
 """
-import asyncio
 import numpy as np
 import connect as ibc
-from signal import signal, SIGINT
 
 
 amount = 5          # Amount that will be traded on each signal.
@@ -22,6 +20,7 @@ data = np.array([0])
 
 ib = ibc.ib_connect()
 ib.open_connection()
+
 print('Connection established')
 
 def print_statement():
@@ -37,6 +36,8 @@ def trade_logic():
     global in_long
     global trade_open
     global last_buy
+    
+    ib.sleep(2)
 
     something_open = ib.open_orders()
 
@@ -46,11 +47,12 @@ def trade_logic():
         else:
             last_buy = ib.modify_limit_order(last_buy, data[-1] + spread)
     else:
-        if not in_long:
+        able_to_trade = ib.balance_check(amount)
+        if not in_long and able_to_trade:
             last_buy = ib.create_limitorder('Buy', amount, data[-1] - spread)
             in_long = True
 
-        else:
+        elif able_to_trade:
             last_buy = ib.create_limitorder('Sell', amount, data[-1] + spread)
             in_long = False
 
