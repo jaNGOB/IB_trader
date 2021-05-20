@@ -38,7 +38,7 @@ def trade_logic():
     global in_long
     global trade_open
     global last_buy
-    
+
     ib.sleep(2)
 
     something_open = ib.open_orders()
@@ -92,8 +92,10 @@ def new_tick(tickers):
     This function is the main loopback function which will be automatically executed 
     by IB whenever a new tick arrives. The tick is then added to the local dataframe
     using process_ticks and then the trading logic is executed.
+
+    :param tickers: Tick changes in the market.
     """
-    for ticker in tickers:
+    for ticker in tickers:  
         process_ticks(ticker)
 
     trade_logic()

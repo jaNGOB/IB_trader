@@ -4,6 +4,8 @@ It contains the functionalities of a trading strategy so to separate the
 process of creating the strategy and the technical part.
 """
 from ib_insync import *
+import nest_asyncio
+nest_asyncio.apply()
 
 class ib_connect:
     def __init__(self, host='127.0.0.1', port=7497, client_id=1):
@@ -45,7 +47,7 @@ class ib_connect:
 
         self.ib.reqMktData(self.ticker)
         self.ib.pendingTickersEvent += loopback_function
-
+        
         while self.ib.waitOnUpdate():
             self.ib.sleep(1)
     
@@ -84,7 +86,6 @@ class ib_connect:
         :param limit: Limit price at which the trade will be entered.
         :return: orderID.
         """
-
         limitOrder = LimitOrder(action = action, totalQuantity= amount, lmtPrice = round(limit, 5))
         order = self.ib.placeOrder(self.ticker, limitOrder)
         order.filledEvent += self.order_filled
@@ -153,7 +154,7 @@ class ib_connect:
         :return: (bool) True if enough is available, false otherwise.
         """
         available = self.available_balance()
-        if available >= amount: return True
+        if float(available) >= amount: return True
         else: return False
 
 
@@ -169,6 +170,9 @@ class ib_connect:
 
 
     def open_orders(self):
+        """
+
+        """
         lst = self.ib.openTrades()
         if len(lst) == 0:
             return False

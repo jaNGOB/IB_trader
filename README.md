@@ -10,6 +10,7 @@ This is a simple implementation of a trading strategy which uses tick data to pe
 ## Installation
 Dependencies:
 - ib_insync
+- nest_asyncio
 - numpy
 
 ## Usage
