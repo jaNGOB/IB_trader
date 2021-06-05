@@ -2,6 +2,8 @@
 Connection class that serves as the backbone of the strategy.
 It contains the functionalities of a trading strategy so to separate the
 process of creating the strategy and the technical part.
+
+June, 2021
 """
 from ib_insync import *
 import nest_asyncio
@@ -112,6 +114,13 @@ class ib_connect:
         """
 
     def modify_limit_order(self, order, limit: float):
+        """
+        Modify an existing limit order. Modification implemented is the change 
+        of the limit itself. 
+
+        :param order: Order that needs to be updated.
+        :param limit: (float) new limit that needs to be set for the existing order.
+        """
         order.lmtPrice = round(limit, 5)
 
         new_order = self.ib.placeOrder(self.ticker, order)
@@ -169,9 +178,10 @@ class ib_connect:
         return available
 
 
-    def open_orders(self):
+    def open_orders(self) -> bool:
         """
-
+        This function checks for open orders and returns True if there are open orders
+        and False otherwise.
         """
         lst = self.ib.openTrades()
         if len(lst) == 0:

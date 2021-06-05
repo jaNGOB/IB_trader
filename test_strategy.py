@@ -1,7 +1,7 @@
 """
 Example of a trading strategy implementation.
 
-Jan Gobeli, 07.05.2021.
+June, 2021.
 """
 import numpy as np
 import tableprint as tp
