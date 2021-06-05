@@ -1,7 +1,5 @@
 # IB_trader
 
-Aaah shit, here we go again.
-
 The goal of this will be to have a IB trader up and running.
 
 ## Goal
@@ -11,6 +9,8 @@ This is a simple implementation of a trading strategy which uses tick data to pe
 Dependencies:
 - ib_insync
 - nest_asyncio
+- tableprint
+- datetime
 - numpy
 
 ## Usage
