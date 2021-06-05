@@ -4,11 +4,13 @@ Example of a trading strategy implementation.
 Jan Gobeli, 07.05.2021.
 """
 import numpy as np
+import tableprint as tp
+from datetime import datetime
 import connect as ibc
 
 ### PARAMETERS ###
 amount = 5          # Amount that will be traded on each signal.
-ticker = 'EURUSD'   # Trading ticker.
+t_ticker = 'EURUSD'   # Trading ticker.
 last_buy = None     # 
 in_long = False     # Flag to check if we are currently in a position.
 lookback = 100      # Amount of data is needed for the trade logic.
@@ -26,7 +28,27 @@ ib.open_connection()
 print('Connection established')
 
 def print_statement():
-    pass
+    """
+    Print a table using tableprint containing relevant information captured by the 
+    loopback function.
+    """
+    headers = ['Time', 'Midprice']
+    out = [[datetime.now(), data[-1]]]
+    tp.table(out, headers, style='clean')
+
+
+def print_trade(side: str, price: float) -> print:
+    """
+    Print statement that will output the trade submitted and at which price to the
+    terminal that runs the code.
+
+    :param side: (str) which side of the trade was submitted
+    :param price: (float) at which price was the trade submitted
+    """
+    print('--------------------------------')
+    print('Submitted a {} order at {}'.format(side, price))
+    print('--------------------------------')
+
 
 def trade_logic():
     """
@@ -52,10 +74,12 @@ def trade_logic():
         able_to_trade = ib.balance_check(amount)
         if not in_long and able_to_trade:
             last_buy = ib.create_limitorder('Buy', amount, data[-1] - spread)
+            print_trade('Buy', data[-1] - spread)
             in_long = True
 
         elif able_to_trade:
             last_buy = ib.create_limitorder('Sell', amount, data[-1] + spread)
+            print_trade('Sell', data[-1] - spread)
             in_long = False
 
     """
@@ -82,6 +106,7 @@ def process_ticks(tick):
 
     #data = np.append(data, (tick.askSize, tick.ask, tick.bid, tick.bidSize))
     data = np.append(data, ((tick.ask + tick.bid) / 2))
+    print_statement()
 
     if len(data) > lookback:
         data = data[1:]
@@ -100,4 +125,4 @@ def new_tick(tickers):
 
     trade_logic()
 
-ib.start_stream('forex', 'EURUSD', new_tick)
+ib.start_stream('forex', t_ticker, new_tick)
