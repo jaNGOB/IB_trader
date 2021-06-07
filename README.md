@@ -7,7 +7,10 @@ This is a simple implementation of a trading strategy which uses tick data to pe
 
 ## Installation
 1. Install this repository locally
-2. Install dependencies
+2. Install dependencies by running
+```
+pip install -r requirements.txt
+```
 Dependencies needed:
 - ib_insync
 - nest_asyncio
