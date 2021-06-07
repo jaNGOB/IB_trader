@@ -13,7 +13,7 @@ import connect as ibc
 amount = 5          # Amount that will be traded on each signal.
 t_ticker = 'EURUSD' # Trading ticker.
 last_buy = None     # Last order made to IB
-last_price = None   # last limit price
+last_price = 0.0001   # last limit price
 in_long = False     # Flag to check if we are currently in a position.
 lookback = 20      # Amount of data is needed for the trade logic.
 count = 0
