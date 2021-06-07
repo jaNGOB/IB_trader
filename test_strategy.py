@@ -36,9 +36,13 @@ def print_statement():
     Print a table using tableprint containing relevant information captured by the 
     loopback function.
     """
-    headers = ['Time', 'Midprice', 'Open Order']
-    out = [[str(datetime.now()), data[-1], last_price]]
-    tp.table(out, headers, style='clean')
+    if last_buy != None:
+        headers = ['Time', 'Midprice', 'Open Order', 'Last Trade']
+        out = [[str(datetime.now()), data[-1], last_price, last_buy.lmtPrice]]
+    else:
+        headers = ['Time', 'Midprice']
+        out = [[str(datetime.now()), data[-1]]]
+    tp.table(out, headers, style='clean', format_spec='8g')
 
 
 def print_trade(side: str, price: float) -> print:
