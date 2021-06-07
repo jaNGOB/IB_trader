@@ -46,7 +46,8 @@ class ib_connect:
             self.ticker = Forex(ticker)
         elif asset == 'stock':
             self.ticker = Stock(ticker, 'CHIXCH', 'CHF')
-
+            
+        self.ib.qualifyContracts(self.ticker)
         self.ib.reqMktData(self.ticker)
         self.ib.pendingTickersEvent += loopback_function
         
@@ -93,7 +94,7 @@ class ib_connect:
         order.filledEvent += self.order_filled
 
         if order.orderStatus.status == 'Submitted':
-            print('Limit{} order submitted @ {}'.format(action, limit))
+            print('Limit{} order submitted @ {}'.format(action, round(limit, 5)))
 
         return order.order
 

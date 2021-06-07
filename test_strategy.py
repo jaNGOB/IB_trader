@@ -4,18 +4,22 @@ Example of a trading strategy implementation.
 June, 2021.
 """
 import numpy as np
+import math
 import tableprint as tp
 from datetime import datetime
 import connect as ibc
 
 ### PARAMETERS ###
 amount = 5          # Amount that will be traded on each signal.
-t_ticker = 'EURUSD'   # Trading ticker.
-last_buy = None     # 
+t_ticker = 'EURUSD' # Trading ticker.
+last_buy = None     # Last order made to IB
+last_price = None   # last limit price
 in_long = False     # Flag to check if we are currently in a position.
-lookback = 100      # Amount of data is needed for the trade logic.
+lookback = 20      # Amount of data is needed for the trade logic.
+count = 0
 
-spread = 0.00002
+spread = 0.00001
+min_tick = 0.00005
 trade_open = False
 
 ###################
@@ -32,8 +36,8 @@ def print_statement():
     Print a table using tableprint containing relevant information captured by the 
     loopback function.
     """
-    headers = ['Time', 'Midprice']
-    out = [[datetime.now(), data[-1]]]
+    headers = ['Time', 'Midprice', 'Open Order']
+    out = [[str(datetime.now()), data[-1], last_price]]
     tp.table(out, headers, style='clean')
 
 
@@ -50,6 +54,31 @@ def print_trade(side: str, price: float) -> print:
     print('--------------------------------')
 
 
+def round_down(x: float, a: float) -> float:
+    """
+    Rounding function to create limit prices that are in line
+    with the minimum tick size of IB as seen in the tests.ipynb.
+
+    :param x: (float) current limit price
+    :param a: (float) base where we want to round to 
+
+    :return: (float) rounded limit price
+    """
+    return round(round(x / a) * a, -int(math.floor(math.log10(a))))
+
+def round_up(x: float, a: float) -> float:
+    """
+    complement of round_down function that uses the original and 
+    adds back the base.
+    
+    :param x: (float) current limit price
+    :param a: (float) base where we want to round to 
+
+    :return: (float) rounded limit price
+    """
+    return (round_down(x, a)+a)
+
+
 def trade_logic():
     """
     This is the main function that will perform the trading strategy itself.
@@ -60,26 +89,35 @@ def trade_logic():
     global in_long
     global trade_open
     global last_buy
-
-    ib.sleep(2)
+    global last_price
 
     something_open = ib.open_orders()
 
     if something_open:
         if in_long:
-            last_buy = ib.modify_limit_order(last_buy, data[-1] - spread)
+            new_p = round_down(data[-1], min_tick)
+            if last_price != new_p:
+                last_price = new_p
+                last_buy = ib.modify_limit_order(last_buy, new_p)
         else:
-            last_buy = ib.modify_limit_order(last_buy, data[-1] + spread)
+            new_p = round_up(data[-1], min_tick)
+            if last_price != new_p:
+                last_price = new_p
+                last_buy = ib.modify_limit_order(last_buy, new_p)
     else:
         able_to_trade = ib.balance_check(amount)
         if not in_long and able_to_trade:
-            last_buy = ib.create_limitorder('Buy', amount, data[-1] - spread)
-            print_trade('Buy', data[-1] - spread)
+            last_price = round_down(data[-1], min_tick)
+            last_buy = ib.create_limitorder('Buy', amount, last_price)
+            print_trade('Buy', last_price)
+            print(data[-1] - spread)
             in_long = True
 
         elif able_to_trade:
-            last_buy = ib.create_limitorder('Sell', amount, data[-1] + spread)
-            print_trade('Sell', data[-1] - spread)
+            last_price = round_up(data[-1], min_tick)
+            last_buy = ib.create_limitorder('Sell', amount, last_price)
+            print_trade('Sell', last_price)
+            print(data[-1] - spread)
             in_long = False
 
     """
@@ -106,6 +144,9 @@ def process_ticks(tick):
 
     #data = np.append(data, (tick.askSize, tick.ask, tick.bid, tick.bidSize))
     data = np.append(data, ((tick.ask + tick.bid) / 2))
+
+    n = len(data)
+
     print_statement()
 
     if len(data) > lookback:
@@ -120,9 +161,15 @@ def new_tick(tickers):
 
     :param tickers: Tick changes in the market.
     """
+    global count
+
     for ticker in tickers:  
         process_ticks(ticker)
 
-    trade_logic()
+    # Only execute the trading logic on every 10th incoming tick.
+    count += 1
+    if count == 10:
+        trade_logic()
+        count = 0
 
 ib.start_stream('forex', t_ticker, new_tick)
