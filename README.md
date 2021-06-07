@@ -6,7 +6,9 @@ The goal of this will be to have a IB trader up and running.
 This is a simple implementation of a trading strategy which uses tick data to perform trades.
 
 ## Installation
-Dependencies:
+1. Install this repository locally
+2. Install dependencies
+Dependencies needed:
 - ib_insync
 - nest_asyncio
 - tableprint
