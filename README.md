@@ -12,12 +12,6 @@ This is a simple implementation of a trading strategy which uses tick data to pe
 ```
 pip install -r requirements.txt
 ```
-Dependencies needed:
-- ib_insync
-- nest_asyncio
-- tableprint
-- datetime
-- numpy
 
 ## Usage
 1. Open a paper account on IB
