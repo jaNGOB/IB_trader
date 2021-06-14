@@ -1,9 +1,8 @@
 # IB_trader
-
-The goal of this will be to have a IB trader up and running.
+This is a simple implementation of a trading strategy which uses tick data to perform trades.
 
 ## Goal
-This is a simple implementation of a trading strategy which uses tick data to perform trades.
+The goal of this will be to have a IB trading algorithm up and running. In addition, users can find functions for backtesting and mass-downloading tick-data using the IB API and especially ib_insync.
 
 ## Installation
 1. Download this repository locally
