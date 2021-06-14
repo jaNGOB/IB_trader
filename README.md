@@ -2,7 +2,7 @@
 This is a simple implementation of a trading strategy which uses tick data to perform trades.
 
 ## Goal
-The goal of this will be to have a IB trading algorithm up and running. In addition, users can find functions for backtesting and mass-downloading tick-data using the IB API and especially ib_insync.
+The goal of this will be to have a IB trading algorithm up and running. In addition, users can find functions for backtesting and mass-downloading tick-data using the IB API and especially [ib_insync](https://github.com/erdewit/ib_insync).
 
 ## Installation
 1. Download this repository locally
