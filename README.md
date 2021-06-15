@@ -20,5 +20,5 @@ pip install -r requirements.txt
 ```
 python YOUR_STRATEGY.py
 ```
-
+ 
 Have fun! :)
